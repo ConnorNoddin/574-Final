@@ -1,5 +1,8 @@
 import threading
 import time
+import os
+
+print(os.getcwd())
 
 # Define a function that will be executed by each thread
 def thread_function(name, delay):
