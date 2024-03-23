@@ -11,6 +11,7 @@ import hashlib
 import math
 import time
 
+
 def convolve(image_matrix, image_filter):
     height, width, channels = image_matrix.shape
     # Makes an empty copy for output
@@ -34,7 +35,7 @@ def convolve(image_matrix, image_filter):
                 # Check for saturation
                 if sum > 255:
                     sum = 255
-                if sum < 0:
+                elif sum < 0:
                     sum = 0
                 # Save convolution to output array
                 image_matrix_copy[y, x, d] = sum
@@ -51,18 +52,19 @@ def combine(image_matrix1, image_matrix2):
         for y in range(1, height - 1, 1):
             # Loop through width
             for x in range(1, width - 1, 1):
-                result = image_matrix1[y, x, d]**2 + image_matrix2[y, x, d]**2
+                result = image_matrix1[y, x, d] ** 2 + image_matrix2[y, x, d] ** 2
                 # Save the results as int() to replicate the C behavior
                 result = int(math.sqrt(result))
                 # Chek for saturation
                 if result > 255:
                     result = 255
-                if result < 0:
+                elif result < 0:
                     result = 0
                 # Save result to putput matrix
                 image_matrix_copy[y, x, d] = result
                 # Do something with the pixel values, for example, print them
     return image_matrix_copy
+
 
 def load_jpeg(file_path):
     try:
@@ -75,6 +77,7 @@ def load_jpeg(file_path):
         print(f"Error loading image {file_path}:", error)
         sys.exit(1)
 
+
 def store_jpeg(image_matrix, filename):
     # Save image using 8 bit jpegs as in 574 homeworks
     new_img = Image.fromarray(image_matrix.astype("uint8"))
@@ -86,12 +89,14 @@ def store_jpeg(image_matrix, filename):
     except Exception as error:
         print(f"Error saving image {filename}:", error)
 
+
 def md5sum(file_path):
     md5_hash = hashlib.md5()
     with open(file_path, "rb") as file:
         data = file.read()
         # Returns MD5 hash as hex
         return hashlib.md5(data).hexdigest()
+
 
 def main():
     # Allows one command line argument for the image input file
@@ -117,13 +122,13 @@ def main():
     x_convolve = convolve(image_matrix, sobel_x_filter)
 
     # X convolve for debugging
-    #store_jpeg(x_convolve, f"{output_name.replace(".jpg", "")}_x.jpg")
+    # store_jpeg(x_convolve, f"{output_name.replace(".jpg", "")}_x.jpg")
 
     # Convolve image and using Y filter
     y_convolve = convolve(image_matrix, sobel_y_filter)
 
     # Y convolve for debugging
-    #store_jpeg(y_convolve, f"{output_name.replace(".jpg", "")}_y.jpg")
+    # store_jpeg(y_convolve, f"{output_name.replace(".jpg", "")}_y.jpg")
 
     convolve_time = time.time()
 
@@ -138,7 +143,7 @@ def main():
     store_time = time.time()
 
     # MD5Sums to ensure convolve performed correctly
-    print(f"MD5SUM of butterfinger_sobel.jpg: {md5sum("butterfinger_sobel.jpg")}")
+    # print(f"MD5SUM of butterfinger_sobel.jpg: {md5sum("butterfinger_sobel.jpg")}")
     print(f"MD5SUM of {output_name}: {md5sum(output_name)}")
 
     # Timing calculations for each major component
@@ -146,6 +151,7 @@ def main():
     print(f"Convolve Time: {convolve_time-load_time}")
     print(f"Combine Time: {combine_time-convolve_time}")
     print(f"Store Time: {store_time-combine_time}")
+
 
 # Ensures main() is only run when the program is run as a script
 if __name__ == "__main__":
