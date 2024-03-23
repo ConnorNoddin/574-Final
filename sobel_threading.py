@@ -157,6 +157,9 @@ def main():
     for thread in threads:
         thread.join()
 
+    # Clear threads
+    threads = []
+
     # Create and start threads to perform the y convolution
     for i in range(num_threads):
         thread = threading.Thread(
@@ -169,6 +172,9 @@ def main():
     # Join each y convolve threads
     for thread in threads:
         thread.join()
+
+    # Clear threads
+    threads = []
 
     convolve_time = time.time()
 
