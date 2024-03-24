@@ -66,7 +66,6 @@ def combine(image_matrix1, image_matrix2, image_output, xstart, xend, thread_num
                     result = 0
                 # Save result to putput matrix
                 image_output[y, x, d] = result
-                # Do something with the pixel values, for example, print them
 
 
 def load_jpeg(file_path):

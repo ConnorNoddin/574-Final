@@ -11,6 +11,7 @@ import hashlib
 import math
 import time
 import multiprocessing
+from multiprocessing import shared_memory
 
 
 def convolve(image_matrix, image_filter, image_output, xstart, xend, process_num):
@@ -19,6 +20,15 @@ def convolve(image_matrix, image_filter, image_output, xstart, xend, process_num
     print(
         f"process {process_num} is doing the follow x values: {int(xstart)} to {int(xend)}"
     )
+
+    # Access the shared memory as a np array for writing
+    existing_shm = shared_memory.SharedMemory(name=image_output)
+    image_output_data = np.ndarray(
+        image_matrix.shape,
+        dtype=image_matrix.dtype,
+        buffer=existing_shm.buf,
+    )
+
     # Loop through each color of pixel
     for d in range(0, channels, 1):
         # Loop through height
@@ -41,14 +51,46 @@ def convolve(image_matrix, image_filter, image_output, xstart, xend, process_num
                 elif sum < 0:
                     sum = 0
                 # Save convolution to output array
-                image_output[y, x, d] = sum
+                image_output_data[y, x, d] = sum
 
 
-def combine(image_matrix1, image_matrix2, image_output, xstart, xend, process_num):
-    height, width, channels = image_matrix1.shape
+def combine(
+    image_matrix1,
+    image_matrix2,
+    image_output,
+    xstart,
+    xend,
+    process_num,
+    image_format,
+):
+    height, width, channels = image_format.shape
     # Debugging for combine
     print(
         f"process {process_num} is doing the follow x values: {int(xstart)} to {int(xend)}"
+    )
+
+    # Access the shared memory as a np array for writing
+    # We need image_format because image_matrix1, image_matrix2, and image_output
+    # are just strings and do not contain dimension data
+    existing_shm_a = shared_memory.SharedMemory(name=image_matrix1)
+    image_matrix1_data = np.ndarray(
+        image_format.shape,
+        dtype=image_format.dtype,
+        buffer=existing_shm_a.buf,
+    )
+
+    existing_shm_b = shared_memory.SharedMemory(name=image_matrix2)
+    image_matrix2_data = np.ndarray(
+        image_format.shape,
+        dtype=image_format.dtype,
+        buffer=existing_shm_b.buf,
+    )
+
+    existing_shm_c = shared_memory.SharedMemory(name=image_output)
+    image_output_data = np.ndarray(
+        image_format.shape,
+        dtype=image_format.dtype,
+        buffer=existing_shm_c.buf,
     )
     # Loop through each color of pixel
     for d in range(0, channels, 1):
@@ -56,7 +98,9 @@ def combine(image_matrix1, image_matrix2, image_output, xstart, xend, process_nu
         for y in range(1, height - 1, 1):
             # Loop through width
             for x in range(int(xstart), int(xend), 1):
-                result = image_matrix1[y, x, d] ** 2 + image_matrix2[y, x, d] ** 2
+                result = (
+                    image_matrix1_data[y, x, d] ** 2 + image_matrix2_data[y, x, d] ** 2
+                )
                 # Save the results as int() to replicate the C behavior
                 result = int(math.sqrt(result))
                 # Chek for saturation
@@ -65,8 +109,7 @@ def combine(image_matrix1, image_matrix2, image_output, xstart, xend, process_nu
                 elif result < 0:
                     result = 0
                 # Save result to putput matrix
-                image_output[y, x, d] = result
-                # Do something with the pixel values, for example, print them
+                image_output_data[y, x, d] = result
 
 
 def load_jpeg(file_path):
@@ -131,8 +174,38 @@ def main():
     load_time = time.time()
 
     # Makes an empty copy for output
-    x_convolve = np.zeros_like(image_matrix)
-    y_convolve = np.zeros_like(image_matrix)
+    zeros = np.zeros_like(image_matrix)
+
+    # Shared memory for multiprocessing
+    shm_a = shared_memory.SharedMemory(create=True, size=zeros.nbytes)
+    shm_b = shared_memory.SharedMemory(create=True, size=zeros.nbytes)
+    shm_c = shared_memory.SharedMemory(create=True, size=zeros.nbytes)
+    # Open shared memory as a np array with the right dimensions
+    x_convolve_shared = np.ndarray(
+        zeros.shape,
+        dtype=zeros.dtype,
+        buffer=shm_a.buf,
+    )
+    # Set all values initially to 0
+    x_convolve_shared[:] = zeros[:]  # Copy the original data into shared memory
+
+    # Open shared memory as a np array with the right dimensions
+    y_convolve_shared = np.ndarray(
+        zeros.shape,
+        dtype=zeros.dtype,
+        buffer=shm_b.buf,
+    )
+    # Set all values initially to 0
+    y_convolve_shared[:] = zeros[:]  # Copy the original data into shared memory
+
+    # Open shared memory as a np array with the right dimensions
+    combined_shared = np.ndarray(
+        zeros.shape,
+        dtype=zeros.dtype,
+        buffer=shm_c.buf,
+    )
+    # Set all values initially to 0
+    combined_shared[:] = zeros[:]  # Copy the original data into shared memory
 
     # Width to calculate work for each process
     _, width, _ = image_matrix.shape
@@ -148,7 +221,14 @@ def main():
     for i in range(num_processes):
         process = multiprocessing.Process(
             target=convolve,
-            args=(image_matrix, sobel_x_filter, x_convolve, xstarts[i], xends[i], i),
+            args=(
+                image_matrix,
+                sobel_x_filter,
+                shm_a.name,
+                xstarts[i],
+                xends[i],
+                i,
+            ),
         )
         processes.append(process)
         process.start()
@@ -164,7 +244,14 @@ def main():
     for i in range(num_processes):
         process = multiprocessing.Process(
             target=convolve,
-            args=(image_matrix, sobel_y_filter, y_convolve, xstarts[i], xends[i], i),
+            args=(
+                image_matrix,
+                sobel_y_filter,
+                shm_b.name,
+                xstarts[i],
+                xends[i],
+                i,
+            ),
         )
         processes.append(process)
         process.start()
@@ -175,9 +262,6 @@ def main():
 
     convolve_time = time.time()
 
-    # Output matrix for combine
-    combined = np.zeros_like(image_matrix)
-
     # Clear Processes
     processes = []
 
@@ -185,7 +269,15 @@ def main():
     for i in range(num_processes):
         process = multiprocessing.Process(
             target=combine,
-            args=(x_convolve, y_convolve, combined, xstarts[i], xends[i], i),
+            args=(
+                shm_a.name,
+                shm_b.name,
+                shm_c.name,
+                xstarts[i],
+                xends[i],
+                i,
+                zeros,
+            ),
         )
         processes.append(process)
         process.start()
@@ -196,8 +288,7 @@ def main():
 
     combine_time = time.time()
 
-    # Store JPEG: Note, quality is 90
-    store_jpeg(combined, output_name)
+    store_jpeg(combined_shared, output_name)
 
     store_time = time.time()
 
