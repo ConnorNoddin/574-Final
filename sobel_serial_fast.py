@@ -16,42 +16,30 @@ from scipy import datasets
 
 def convolve(image_matrix, image_filter):
     height, width, channels = image_matrix.shape
-    grad = np.zeros_like(image_matrix)
+    grad = np.zeros_like(image_matrix).astype(np.uint32)
     # Do one convolution for each color
     for d in range(0, channels, 1):
         grad[1:height-1, 1:width-1, d] = signal.convolve2d(
-            image_matrix[:, :, d],
-            image_filter,
+            image_matrix[:, :, d].astype(np.uint32),
+            image_filter.astype(np.uint32),
             boundary="wrap",
             mode="valid",
             fillvalue=0,
         )
-        grad[:, :, d] = np.clip(grad[:, :, d], 0, 255)
+        # Ensures values are in valid range
+        grad[:, :, d] = np.clip(grad[:, :, d], 0, 255).astype(np.uint8)
     return grad
 
 
 def combine(image_matrix1, image_matrix2):
-    height, width, channels = image_matrix1.shape
-    # Makes an empty copy for output
-    image_matrix_copy = np.zeros_like(image_matrix1)
-    # Loop through each color of pixel
-    for d in range(0, channels, 1):
-        # Loop through height
-        for y in range(1, height - 1, 1):
-            # Loop through width
-            for x in range(1, width - 1, 1):
-                result = image_matrix1[y, x, d] ** 2 + image_matrix2[y, x, d] ** 2
-                # Save the results as int() to replicate the C behavior
-                result = int(math.sqrt(result))
-                # Chek for saturation
-                if result > 255:
-                    result = 255
-                elif result < 0:
-                    result = 0
-                # Save result to putput matrix
-                image_matrix_copy[y, x, d] = result
-                # Do something with the pixel values, for example, print them
-    return image_matrix_copy
+    # Square the pixel values of each image
+    sum = image_matrix1.astype(np.int64) ** 2 + image_matrix2.astype(np.int64) ** 2
+    
+    # Ensures values are between 0 and 255
+    output_matrix = np.sqrt(sum)
+    output_matrix = np.clip(output_matrix, 0, 255)
+    
+    return output_matrix.astype(np.uint8)
 
 
 def load_jpeg(file_path):
