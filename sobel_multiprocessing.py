@@ -302,6 +302,11 @@ def main():
     print(f"Combine Time: {combine_time-convolve_time}")
     print(f"Store Time: {store_time-combine_time}")
 
+    # Free shared memory
+    shm_a.close()
+    shm_b.close()
+    shm_c.close()
+
 
 # Ensures main() is only run when the program is run as a script
 if __name__ == "__main__":
