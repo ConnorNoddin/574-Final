@@ -306,6 +306,9 @@ def main():
     shm_a.close()
     shm_b.close()
     shm_c.close()
+    shm_a.unlink()
+    shm_b.unlink()
+    shm_c.unlink()
 
 
 # Ensures main() is only run when the program is run as a script
