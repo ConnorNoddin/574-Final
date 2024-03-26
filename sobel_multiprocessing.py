@@ -14,11 +14,11 @@ import multiprocessing
 from multiprocessing import shared_memory
 
 
-def convolve(image_matrix, image_filter, image_output, xstart, xend, process_num):
+def convolve(image_matrix, image_filter, image_output, ystart, yend, process_num):
     height, width, channels = image_matrix.shape
     # Debugging for convolve
     print(
-        f"process {process_num} is doing the follow x values: {int(xstart)} to {int(xend)}"
+        f"process {process_num} is doing convolve on the follow x values: {int(ystart)} to {int(yend)}"
     )
 
     # Access the shared memory as a np array for writing
@@ -32,9 +32,9 @@ def convolve(image_matrix, image_filter, image_output, xstart, xend, process_num
     # Loop through each color of pixel
     for d in range(0, channels, 1):
         # Loop through height
-        for y in range(1, height - 1, 1):
+        for x in range(1, width - 1, 1):
             # Loop through width
-            for x in range(int(xstart), int(xend), 1):
+            for y in range(ystart, yend, 1):
                 # Get the RGB values of the pixel
                 sum = image_matrix[y - 1, x - 1, d] * image_filter[0]
                 sum += image_matrix[y - 1, x, d] * image_filter[1]
@@ -58,15 +58,15 @@ def combine(
     image_matrix1,
     image_matrix2,
     image_output,
-    xstart,
-    xend,
+    ystart,
+    yend,
     process_num,
     image_format,
 ):
     height, width, channels = image_format.shape
     # Debugging for combine
     print(
-        f"process {process_num} is doing the follow x values: {int(xstart)} to {int(xend)}"
+        f"process {process_num} is doing combine on the follow x values: {int(ystart)} to {int(yend)}"
     )
 
     # Access the shared memory as a np array for writing
@@ -95,9 +95,9 @@ def combine(
     # Loop through each color of pixel
     for d in range(0, channels, 1):
         # Loop through height
-        for y in range(1, height - 1, 1):
+        for x in range(1, width - 1, 1):
             # Loop through width
-            for x in range(int(xstart), int(xend), 1):
+            for y in range(ystart, yend, 1):
                 result = (
                     image_matrix1_data[y, x, d] ** 2 + image_matrix2_data[y, x, d] ** 2
                 )
@@ -159,8 +159,8 @@ def main():
     # List to hold processes
     processes = []
     # Start and end values fo each process
-    xstarts = [0] * num_processes
-    xends = [0] * num_processes
+    ystarts = [0] * num_processes
+    yends = [0] * num_processes
 
     # Name for the output image
     output_name = "out.jpg"
@@ -207,14 +207,14 @@ def main():
     combined_shared[:] = zeros[:]  # Copy the original data into shared memory
 
     # Width to calculate work for each process
-    _, width, _ = image_matrix.shape
+    height, _, _ = image_matrix.shape
 
     # Get start and end x values for each process
-    chunk_size = width // num_processes  # // floors the division
-    xstarts = [i * chunk_size for i in range(num_processes)]
-    xends = [start + chunk_size for start in xstarts]
-    xstarts[0] = 1  # First index is always 1
-    xends[-1] = width - 1  # Last index is always width-1
+    chunk_size = height // num_processes  # // floors the division
+    ystarts = [i * chunk_size for i in range(num_processes)]
+    yends = [start + chunk_size for start in ystarts]
+    ystarts[0] = 1  # First index is always 1
+    yends[-1] = height - 1  # Last index doesn't calculate edge
 
     # Create and start processes to perform the x convolution
     for i in range(num_processes):
@@ -224,8 +224,8 @@ def main():
                 image_matrix,
                 sobel_x_filter,
                 shm_a.name,
-                xstarts[i],
-                xends[i],
+                ystarts[i],
+                yends[i],
                 i,
             ),
         )
@@ -247,8 +247,8 @@ def main():
                 image_matrix,
                 sobel_y_filter,
                 shm_b.name,
-                xstarts[i],
-                xends[i],
+                ystarts[i],
+                yends[i],
                 i,
             ),
         )
@@ -272,8 +272,8 @@ def main():
                 shm_a.name,
                 shm_b.name,
                 shm_c.name,
-                xstarts[i],
-                xends[i],
+                ystarts[i],
+                yends[i],
                 i,
                 zeros,
             ),
