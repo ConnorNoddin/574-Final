@@ -18,10 +18,10 @@ def convolve(image_matrix, image_filter):
     image_matrix_copy = np.zeros_like(image_matrix)
     # Loop through each color of pixel
     for d in range(0, channels, 1):
-        # Loop through height
-        for y in range(1, height - 1, 1):
-            # Loop through width
-            for x in range(1, width - 1, 1):
+        # Loop through width
+        for x in range(1, width - 1, 1):
+            # Loop through height
+            for y in range(1, height - 1, 1):
                 # Get the RGB values of the pixel
                 sum = image_matrix[y - 1, x - 1, d] * image_filter[0]
                 sum += image_matrix[y - 1, x, d] * image_filter[1]
@@ -48,10 +48,10 @@ def combine(image_matrix1, image_matrix2):
     image_matrix_copy = np.zeros_like(image_matrix1)
     # Loop through each color of pixel
     for d in range(0, channels, 1):
-        # Loop through height
-        for y in range(1, height - 1, 1):
-            # Loop through width
-            for x in range(1, width - 1, 1):
+        # Loop through width
+        for x in range(1, width - 1, 1):
+            # Loop through height
+            for y in range(1, height - 1, 1):
                 result = image_matrix1[y, x, d] ** 2 + image_matrix2[y, x, d] ** 2
                 # Save the results as int() to replicate the C behavior
                 result = int(math.sqrt(result))
