@@ -137,7 +137,6 @@ def store_jpeg(image_matrix, filename):
 
 
 def md5sum(file_path):
-    md5_hash = hashlib.md5()
     with open(file_path, "rb") as file:
         data = file.read()
         # Returns MD5 hash as hex

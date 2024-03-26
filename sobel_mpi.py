@@ -13,14 +13,15 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 
-def convolve(image_matrix, image_filter, image_output, xstart, xend):
+def convolve(image_matrix, image_filter, image_output, ystart, yend):
     height, width, channels = image_matrix.shape
+    print(f"Node is {rank}... doing convolve from {ystart} to {yend}")
     # Loop through each color of pixel
     for d in range(0, channels, 1):
         # Loop through height
-        for y in range(1, height - 1, 1):
+        for x in range(1, width - 1, 1):
             # Loop through width
-            for x in range(int(xstart), int(xend), 1):
+            for y in range(ystart, yend, 1):
                 # Get the RGB values of the pixel
                 sum = image_matrix[y - 1, x - 1, d] * image_filter[0]
                 sum += image_matrix[y - 1, x, d] * image_filter[1]
@@ -40,14 +41,15 @@ def convolve(image_matrix, image_filter, image_output, xstart, xend):
                 image_output[y, x, d] = sum
 
 
-def combine(image_matrix1, image_matrix2, image_output, xstart, xend):
+def combine(image_matrix1, image_matrix2, image_output, ystart, yend):
     height, width, channels = image_matrix1.shape
+    print(f"Node is {rank}... doing combine from {ystart} to {yend}")
     # Loop through each color of pixel
     for d in range(0, channels, 1):
-        # Loop through height
-        for y in range(1, height - 1, 1):
-            # Loop through width
-            for x in range(int(xstart), int(xend), 1):
+        # Loop through width
+        for x in range(1, width - 1, 1):
+            # Loop through height
+            for y in range(ystart, yend, 1):
                 result = image_matrix1[y, x, d] ** 2 + image_matrix2[y, x, d] ** 2
                 # Save the results as int() to replicate the C behavior
                 result = int(math.sqrt(result))
@@ -85,7 +87,6 @@ def store_jpeg(image_matrix, filename):
 
 
 def md5sum(file_path):
-    md5_hash = hashlib.md5()
     with open(file_path, "rb") as file:
         data = file.read()
         # Returns MD5 hash as hex
@@ -117,38 +118,54 @@ def main():
     image_matrix = comm.bcast(image_matrix, root=0)
 
     # Split image width among processes
-    width = image_matrix.shape[1]
-    chunk_size = width // size
-    start_col = rank * chunk_size
-    end_col = start_col + chunk_size
+    height = image_matrix.shape[0]
+    chunk_size = height // size
+    start_y = rank * chunk_size
+    end_y = start_y + chunk_size
 
-    # Adjust start_col and end_col to ensure they are within image bounds
+    # First rank does not do edge
     if rank == 0:
-        start_col = 1
+        start_y = 1
+    # Last rank is does not do edge
     if rank == size - 1:
-        end_col = width - 1
+        end_y = height - 1
 
     # Perform convolution on each process
     x_convolve = np.zeros_like(image_matrix)
     y_convolve = np.zeros_like(image_matrix)
-    convolve(image_matrix, sobel_x_filter, x_convolve, start_col, end_col)
-    convolve(image_matrix, sobel_y_filter, y_convolve, start_col, end_col)
+    combined_result = np.zeros_like(image_matrix)
+    convolve(image_matrix, sobel_x_filter, x_convolve, start_y, end_y)
+    convolve(image_matrix, sobel_y_filter, y_convolve, start_y, end_y)
+    combine(x_convolve, y_convolve, combined_result, start_y, end_y)
 
-    # Combine results on rank 0
-    if rank == 0:
-        combined = np.zeros_like(image_matrix)
-    else:
-        combined = None
+    # Flatten the 3D NumPy array to a 1D list to help with MPI gather
+    combined_1d = combined_result.flatten().tolist()
 
-    # Gather results to rank 0
-    comm.Gather(y_convolve, combined, root=0)
+    final_result_1d = comm.gather(combined_1d, root=0)
 
     # Save JPEG on rank 0
     if rank == 0:
-        store_jpeg(combined, output_file)
+        recovery_3d = np.array(final_result_1d)
+        numpy_array_tmp = np.zeros_like(image_matrix)
+        numpy_array_back = np.zeros_like(image_matrix)
+        starts = []
+        ends = []
+        for i in range(size):
+            starts.append(i * chunk_size)
+            ends.append(starts[i] + chunk_size)
+        starts[0] = 1
+        ends[-1] = height - 1
+
+        for i in range(size):
+            numpy_array_tmp = recovery_3d[i, :].reshape(image_matrix.shape)
+            numpy_array_back[starts[i] : ends[i], :] = numpy_array_tmp[
+                starts[i] : ends[i], :
+            ]
+        # Store final 3d result
+        store_jpeg(numpy_array_back, output_file)
         # Print MD5 sum
         print(f"MD5SUM of {output_file}: {md5sum(output_file)}")
 
 
-# Run main function
+# Always run main function MPI way
 main()
