@@ -1,0 +1,53 @@
+Node is 0... doing convolve from 1 to 20
+Node is 7... doing convolve from 140 to 160
+Node is 8... doing convolve from 160 to 180
+Node is 9... doing convolve from 180 to 200
+Node is 10... doing convolve from 200 to 220
+Node is 11... doing convolve from 220 to 240
+Node is 12... doing convolve from 240 to 260
+Node is 13... doing convolve from 260 to 280
+Node is 14... doing convolve from 280 to 300
+Node is 15... doing convolve from 300 to 319
+Node is 1... doing convolve from 20 to 40
+Node is 2... doing convolve from 40 to 60
+Node is 3... doing convolve from 60 to 80
+Node is 4... doing convolve from 80 to 100
+Node is 5... doing convolve from 100 to 120
+Node is 6... doing convolve from 120 to 140
+Node is 0... doing convolve from 1 to 20
+Node is 15... doing convolve from 300 to 319
+Node is 6... doing convolve from 120 to 140
+Node is 7... doing convolve from 140 to 160
+Node is 8... doing convolve from 160 to 180
+Node is 9... doing convolve from 180 to 200
+Node is 12... doing convolve from 240 to 260
+Node is 14... doing convolve from 280 to 300
+Node is 1... doing convolve from 20 to 40
+Node is 2... doing convolve from 40 to 60
+Node is 3... doing convolve from 60 to 80
+Node is 4... doing convolve from 80 to 100
+Node is 5... doing convolve from 100 to 120
+Node is 11... doing convolve from 220 to 240
+Node is 13... doing convolve from 260 to 280
+Node is 10... doing convolve from 200 to 220
+Node is 0... doing combine from 1 to 20
+Node is 15... doing combine from 300 to 319
+Node is 5... doing combine from 100 to 120
+Node is 9... doing combine from 180 to 200
+Node is 12... doing combine from 240 to 260
+Node is 14... doing combine from 280 to 300
+Node is 1... doing combine from 20 to 40
+Node is 2... doing combine from 40 to 60
+Node is 3... doing combine from 60 to 80
+Node is 4... doing combine from 80 to 100
+Node is 6... doing combine from 120 to 140
+Node is 7... doing combine from 140 to 160
+Node is 8... doing combine from 160 to 180
+Node is 11... doing combine from 220 to 240
+Node is 13... doing combine from 260 to 280
+Node is 10... doing combine from 200 to 220
+MD5SUM of out.jpg: c32a974e2716590755fd739634d48ee3
+Load Time: 0.020151138305664062
+Convolve Time: 0.6896672248840332
+Combine Time: 0.43838047981262207
+Store Time: 0.0014455318450927734
