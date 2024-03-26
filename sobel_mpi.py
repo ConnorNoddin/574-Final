@@ -5,6 +5,8 @@ import copy
 import hashlib
 import math
 import time
+from PIL import Image
+
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
