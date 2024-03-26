@@ -13,18 +13,18 @@ import time
 import threading
 
 
-def convolve(image_matrix, image_filter, image_output, xstart, xend, thread_num):
+def convolve(image_matrix, image_filter, image_output, ystart, yend, thread_num):
     height, width, channels = image_matrix.shape
     # Debugging for convolve
     print(
-        f"Thread {thread_num} is doing the follow x values: {int(xstart)} to {int(xend)}"
+        f"Thread {thread_num} is doing convolve for the follow y values: {int(ystart)} to {int(yend)}"
     )
     # Loop through each color of pixel
     for d in range(0, channels, 1):
-        # Loop through height
-        for y in range(1, height - 1, 1):
-            # Loop through width
-            for x in range(int(xstart), int(xend), 1):
+        # Loop through width
+        for x in range(1, width-1, 1):
+            # Loop through height
+            for y in range(ystart, yend, 1): 
                 # Get the RGB values of the pixel
                 sum = image_matrix[y - 1, x - 1, d] * image_filter[0]
                 sum += image_matrix[y - 1, x, d] * image_filter[1]
@@ -44,18 +44,18 @@ def convolve(image_matrix, image_filter, image_output, xstart, xend, thread_num)
                 image_output[y, x, d] = sum
 
 
-def combine(image_matrix1, image_matrix2, image_output, xstart, xend, thread_num):
+def combine(image_matrix1, image_matrix2, image_output, ystart, yend, thread_num):
     height, width, channels = image_matrix1.shape
     # Debugging for combine
     print(
-        f"Thread {thread_num} is doing the follow x values: {int(xstart)} to {int(xend)}"
+        f"Thread {thread_num} is doing combine for the follow y values: {int(ystart)} to {int(yend)}"
     )
     # Loop through each color of pixel
     for d in range(0, channels, 1):
         # Loop through height
-        for y in range(1, height - 1, 1):
+        for x in range(1, width - 1, 1):
             # Loop through width
-            for x in range(int(xstart), int(xend), 1):
+            for y in range(ystart, yend, 1):
                 result = image_matrix1[y, x, d] ** 2 + image_matrix2[y, x, d] ** 2
                 # Save the results as int() to replicate the C behavior
                 result = int(math.sqrt(result))
@@ -115,8 +115,8 @@ def main():
     # List to hold threads
     threads = []
     # Start and end values fo each thread
-    xstarts = [0] * num_threads
-    xends = [0] * num_threads
+    ystarts = [0] * num_threads
+    yends = [0] * num_threads
 
     # Name for the output image
     output_name = "out.jpg"
@@ -133,20 +133,20 @@ def main():
     y_convolve = np.zeros_like(image_matrix)
 
     # Width to calculate work for each thread
-    _, width, _ = image_matrix.shape
+    height, _, _ = image_matrix.shape
 
     # Get start and end x values for each thread
-    chunk_size = width // num_threads  # // floors the division
-    xstarts = [i * chunk_size for i in range(num_threads)]
-    xends = [start + chunk_size for start in xstarts]
-    xstarts[0] = 1  # First index is always 1
-    xends[-1] = width - 1  # Last index is always width-1
+    chunk_size = height // num_threads  # // floors the division
+    ystarts = [i * chunk_size for i in range(num_threads)]
+    yends = [start + chunk_size for start in ystarts]
+    ystarts[0] = 1  # First index is always 1
+    yends[-1] = height- 1  # Last index does not do border
 
     # Create and start threads to perform the x convolution
     for i in range(num_threads):
         thread = threading.Thread(
             target=convolve,
-            args=(image_matrix, sobel_x_filter, x_convolve, xstarts[i], xends[i], i),
+            args=(image_matrix, sobel_x_filter, x_convolve, ystarts[i], yends[i], i),
         )
         threads.append(thread)
         thread.start()
@@ -162,7 +162,7 @@ def main():
     for i in range(num_threads):
         thread = threading.Thread(
             target=convolve,
-            args=(image_matrix, sobel_y_filter, y_convolve, xstarts[i], xends[i], i),
+            args=(image_matrix, sobel_y_filter, y_convolve, ystarts[i], yends[i], i),
         )
         threads.append(thread)
         thread.start()
@@ -183,7 +183,7 @@ def main():
     for i in range(num_threads):
         thread = threading.Thread(
             target=combine,
-            args=(x_convolve, y_convolve, combined, xstarts[i], xends[i], i),
+            args=(x_convolve, y_convolve, combined, ystarts[i], yends[i], i),
         )
         threads.append(thread)
         thread.start()
