@@ -11,7 +11,6 @@ import hashlib
 import math
 import time
 from scipy import signal
-from scipy import datasets
 
 
 def convolve(image_matrix, image_filter):
@@ -22,24 +21,28 @@ def convolve(image_matrix, image_filter):
         grad[1:height-1, 1:width-1, d] = signal.convolve2d(
             image_matrix[:, :, d].astype(np.uint32),
             image_filter.astype(np.uint32),
-            boundary="wrap",
+            boundary="fill",
             mode="valid",
             fillvalue=0,
         )
         # Ensures values are in valid range
-        grad[:, :, d] = np.clip(grad[:, :, d], 0, 255).astype(np.uint8)
+        grad[:, :, d] = np.clip(grad[:, :, d], 0, 255).astype(np.uint32)
+
+    grad[grad==255] = 0
     return grad
 
 
 def combine(image_matrix1, image_matrix2):
-    # Square the pixel values of each image
-    sum = image_matrix1.astype(np.int64) ** 2 + image_matrix2.astype(np.int64) ** 2
+    # Square and sum the pixel values of each image
+    sum = image_matrix1.astype(np.uint32) ** 2 + image_matrix2.astype(np.uint32) ** 2
     
-    # Ensures values are between 0 and 255
+    # Sqrt of each value in entire array
     output_matrix = np.sqrt(sum)
-    output_matrix = np.clip(output_matrix, 0, 255)
+
+    # Ensures values are in the correct range
+    output_matrix = np.clip(output_matrix, 0, 255).astype(np.uint32)
     
-    return output_matrix.astype(np.uint8)
+    return output_matrix
 
 
 def load_jpeg(file_path):
@@ -80,18 +83,35 @@ def main():
         sys.exit(1)
 
     # X and Y filter as used in the ECE 574 homeworks
+    # sobel_x_filter = np.array(
+    #     [
+    #         [-1, 0, +1],
+    #         [-2, 0, +2],
+    #         [-1, 0, +1],
+    #     ],
+    # )
+    # sobel_y_filter = np.array(
+    #     [
+    #         [-1, -2, -1],
+    #         [0, 0, 0],
+    #         [1, 2, +1],
+    #     ]
+    # )
+
+    # Mirror the kernel
     sobel_x_filter = np.array(
         [
-            [-1, 0, +1],
-            [-2, 0, +2],
-            [-1, 0, +1],
-        ],
+            [+1, 0, -1],
+            [2, 0, -2],
+            [+1, 0, -1],
+        ]
     )
+
     sobel_y_filter = np.array(
         [
-            [-1, -2, -1],
+            [+1, 2, +1],
             [0, 0, 0],
-            [1, 2, +1],
+            [-1, -2, -1],
         ]
     )
 
@@ -109,13 +129,13 @@ def main():
     x_convolve = convolve(image_matrix, sobel_x_filter)
 
     # X convolve for debugging
-    store_jpeg(x_convolve, f"{output_name.replace(".jpg", "")}_x.jpg")
+    store_jpeg(x_convolve, f"{output_name.replace('.jpg', '')}_x.jpg")
 
     # Convolve image and using Y filter
     y_convolve = convolve(image_matrix, sobel_y_filter)
 
     # Y convolve for debugging
-    store_jpeg(y_convolve, f"{output_name.replace(".jpg", "")}_y.jpg")
+    store_jpeg(y_convolve, f"{output_name.replace('.jpg', '')}_y.jpg")
 
     convolve_time = time.time()
 
