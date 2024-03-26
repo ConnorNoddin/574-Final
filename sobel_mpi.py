@@ -141,26 +141,33 @@ def main():
     # Flatten the 3D NumPy array to a 1D list to help with MPI gather
     combined_1d = combined_result.flatten().tolist()
 
+    # Gather 1d arrays from all nodes
     final_result_1d = comm.gather(combined_1d, root=0)
 
-    # Save JPEG on rank 0
     if rank == 0:
+        # Convert the 1d array to a np array
         recovery_3d = np.array(final_result_1d)
+
+        # Preallocating arrays and lists for compiling data
         numpy_array_tmp = np.zeros_like(image_matrix)
         numpy_array_back = np.zeros_like(image_matrix)
         starts = []
         ends = []
+
+        # Get indices for compiling data
         for i in range(size):
             starts.append(i * chunk_size)
             ends.append(starts[i] + chunk_size)
         starts[0] = 1
         ends[-1] = height - 1
 
+        # Compile data into final 3d array
         for i in range(size):
             numpy_array_tmp = recovery_3d[i, :].reshape(image_matrix.shape)
             numpy_array_back[starts[i] : ends[i], :] = numpy_array_tmp[
                 starts[i] : ends[i], :
             ]
+
         # Store final 3d result
         store_jpeg(numpy_array_back, output_file)
         # Print MD5 sum
