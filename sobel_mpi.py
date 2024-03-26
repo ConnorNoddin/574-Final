@@ -92,14 +92,14 @@ def md5sum(file_path):
 
 def main():
     # Allows one command line argument for the image input file
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 2:
         if rank == 0:
-            print("Usage: python sobel_mpi.py <image_file> <output_file>")
+            print("Usage: python sobel_mpi.py <image_file>")
         sys.exit(1)
 
     # Get the input filename from command-line argument
     input_file = sys.argv[1]
-    output_file = sys.argv[2]
+    output_file = "out.jpg"
 
     # X and Y filter as used in the ECE 574 homeworks
     sobel_x_filter = [-1, 0, +1, -2, 0, +2, -1, 0, +1]
