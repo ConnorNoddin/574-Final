@@ -3,9 +3,9 @@ Final Project For ECE 574
 
 
 TODO tasks:
-Recollect data for threading and multiprocessing on 11700k
+Make cluster between laptop and desktop for epic MPI run and get data
 
-Make cluster between laptop and desktop for epic MPI run
+Sobel serial fast
 
 
 Big Picture:
