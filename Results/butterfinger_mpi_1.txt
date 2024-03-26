@@ -1,0 +1,8 @@
+Node is 0... doing convolve from 1 to 319
+Node is 0... doing convolve from 1 to 319
+Node is 0... doing combine from 1 to 319
+MD5SUM of out.jpg: c32a974e2716590755fd739634d48ee3
+Load Time: 0.009363889694213867
+Convolve Time: 5.1105170249938965
+Combine Time: 0.6112473011016846
+Store Time: 0.0012128353118896484

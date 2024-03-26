@@ -108,11 +108,15 @@ def main():
     sobel_x_filter = [-1, 0, +1, -2, 0, +2, -1, 0, +1]
     sobel_y_filter = [-1, -2, -1, 0, 0, 0, 1, 2, +1]
 
+    start_time = time.time()
+
     # Load image on rank 0
     if rank == 0:
         image_matrix = load_jpeg(input_file)
     else:
         image_matrix = None
+
+    load_time = time.time()
 
     # Broadcast image_matrix to all processes
     image_matrix = comm.bcast(image_matrix, root=0)
@@ -136,6 +140,9 @@ def main():
     combined_result = np.zeros_like(image_matrix)
     convolve(image_matrix, sobel_x_filter, x_convolve, start_y, end_y)
     convolve(image_matrix, sobel_y_filter, y_convolve, start_y, end_y)
+
+    convolve_time = time.time()
+
     combine(x_convolve, y_convolve, combined_result, start_y, end_y)
 
     # Flatten the 3D NumPy array to a 1D list to help with MPI gather
@@ -168,10 +175,21 @@ def main():
                 starts[i] : ends[i], :
             ]
 
+        combine_time = time.time()
+
         # Store final 3d result
         store_jpeg(numpy_array_back, output_file)
+
+        store_time = time.time()
+
         # Print MD5 sum
         print(f"MD5SUM of {output_file}: {md5sum(output_file)}")
+
+        # Timing calculations for each major component
+        print(f"Load Time: {load_time-start_time}")
+        print(f"Convolve Time: {convolve_time-load_time}")
+        print(f"Combine Time: {combine_time-convolve_time}")
+        print(f"Store Time: {store_time-combine_time}")
 
 
 # Always run main function MPI way

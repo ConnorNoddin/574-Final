@@ -1,0 +1,29 @@
+Node is 5... doing convolve from 1830 to 2196
+Node is 2... doing convolve from 732 to 1098
+Node is 3... doing convolve from 1098 to 1464
+Node is 0... doing convolve from 1 to 366
+Node is 1... doing convolve from 366 to 732
+Node is 7... doing convolve from 2562 to 2928
+Node is 4... doing convolve from 1464 to 1830
+Node is 6... doing convolve from 2196 to 2562
+Node is 0... doing convolve from 1 to 366
+Node is 3... doing convolve from 1098 to 1464
+Node is 1... doing convolve from 366 to 732
+Node is 6... doing convolve from 2196 to 2562
+Node is 5... doing convolve from 1830 to 2196
+Node is 4... doing convolve from 1464 to 1830
+Node is 2... doing convolve from 732 to 1098
+Node is 7... doing convolve from 2562 to 2928
+Node is 3... doing combine from 1098 to 1464
+Node is 0... doing combine from 1 to 366
+Node is 1... doing combine from 366 to 732
+Node is 2... doing combine from 732 to 1098
+Node is 6... doing combine from 2196 to 2562
+Node is 4... doing combine from 1464 to 1830
+Node is 5... doing combine from 1830 to 2196
+Node is 7... doing combine from 2562 to 2928
+MD5SUM of out.jpg: 7a17b02fe7e4e676b575f6f66ba4fa01
+Load Time: 0.13258123397827148
+Convolve Time: 96.25480246543884
+Combine Time: 27.876527309417725
+Store Time: 0.08016610145568848
