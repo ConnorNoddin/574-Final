@@ -1,1 +1,8 @@
 Node is 0... doing convolve from 1 to 2928
+Node is 0... doing convolve from 1 to 2928
+Node is 0... doing combine from 1 to 2928
+MD5SUM of out.jpg: 7a17b02fe7e4e676b575f6f66ba4fa01
+Load Time: 0.12445926666259766
+Convolve Time: 626.1694316864014
+Combine Time: 72.2642433643341
+Store Time: 0.07165718078613281
