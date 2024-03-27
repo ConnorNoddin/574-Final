@@ -15,32 +15,31 @@ from scipy import signal
 
 def convolve(image_matrix, image_filter):
     height, width, channels = image_matrix.shape
-    grad = np.zeros_like(image_matrix).astype(np.uint32)
+    grad = np.zeros_like(image_matrix).astype(np.double)
     # Do one convolution for each color
     for d in range(0, channels, 1):
         grad[1 : height - 1, 1 : width - 1, d] = signal.convolve2d(
-            image_matrix[:, :, d].astype(np.uint32),
-            image_filter.astype(np.uint32),
+            image_matrix[:, :, d].astype(np.double),
+            image_filter.astype(np.double),
             boundary="fill",
             mode="valid",
             fillvalue=0,
         )
         # Ensures values are in valid range
-        grad[:, :, d] = np.clip(grad[:, :, d], 0, 255).astype(np.uint32)
+        grad[:, :, d] = np.clip(grad[:, :, d], 0, 255).astype(np.double)
 
-    grad = grad - 255
     return grad
 
 
 def combine(image_matrix1, image_matrix2):
     # Square and sum the pixel values of each image
-    sum = image_matrix1.astype(np.uint32) ** 2 + image_matrix2.astype(np.uint32) ** 2
+    sum = image_matrix1.astype(np.double) ** 2 + image_matrix2.astype(np.double) ** 2
 
     # Sqrt of each value in entire array
     output_matrix = np.sqrt(sum)
 
     # Ensures values are in the correct range
-    output_matrix = np.clip(output_matrix, 0, 255).astype(np.uint32)
+    output_matrix = np.clip(output_matrix, 0, 255).astype(np.double)
 
     return output_matrix
 
