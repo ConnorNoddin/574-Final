@@ -1,11 +1,6 @@
 # 574-Final
 Final Project For ECE 574
 
-
-TODO tasks:
-Make cluster between laptop and desktop for epic MPI run and get data
-
-
 Big Picture:
 Row major performance improvements in python numpy (see git history for data files)
 
