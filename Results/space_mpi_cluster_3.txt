@@ -1,0 +1,14 @@
+Node is 1... doing convolve from 976 to 1952
+Node is 2... doing convolve from 1952 to 2928
+Node is 0... doing convolve from 1 to 976
+Node is 1... doing convolve from 976 to 1952
+Node is 0... doing convolve from 1 to 976
+Node is 2... doing convolve from 1952 to 2928
+Node is 0... doing combine from 1 to 976
+Node is 2... doing combine from 1952 to 2928
+Node is 1... doing combine from 976 to 1952
+MD5SUM of out.jpg: 7a17b02fe7e4e676b575f6f66ba4fa01
+Load Time: 0.12202978134155273
+Convolve Time: 391.7835154533386
+Combine Time: 59.152904987335205
+Store Time: 0.11605119705200195

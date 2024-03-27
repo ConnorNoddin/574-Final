@@ -1,0 +1,20 @@
+Node is 0... doing convolve from 1 to 585
+Node is 1... doing convolve from 585 to 1170
+Node is 2... doing convolve from 1170 to 1755
+Node is 3... doing convolve from 1755 to 2340
+Node is 4... doing convolve from 2340 to 2928
+Node is 0... doing convolve from 1 to 585
+Node is 2... doing convolve from 1170 to 1755
+Node is 1... doing convolve from 585 to 1170
+Node is 3... doing convolve from 1755 to 2340
+Node is 0... doing combine from 1 to 585
+Node is 2... doing combine from 1170 to 1755
+Node is 1... doing combine from 585 to 1170
+Node is 3... doing combine from 1755 to 2340
+Node is 4... doing convolve from 2340 to 2928
+Node is 4... doing combine from 2340 to 2928
+MD5SUM of out.jpg: 7a17b02fe7e4e676b575f6f66ba4fa01
+Load Time: 0.12279438972473145
+Convolve Time: 236.24490022659302
+Combine Time: 475.3442339897156
+Store Time: 0.07725763320922852

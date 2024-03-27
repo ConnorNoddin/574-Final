@@ -1,0 +1,17 @@
+Node is 0... doing convolve from 1 to 732
+Node is 1... doing convolve from 732 to 1464
+Node is 2... doing convolve from 1464 to 2196
+Node is 3... doing convolve from 2196 to 2928
+Node is 1... doing convolve from 732 to 1464
+Node is 2... doing convolve from 1464 to 2196
+Node is 3... doing convolve from 2196 to 2928
+Node is 0... doing convolve from 1 to 732
+Node is 1... doing combine from 732 to 1464
+Node is 2... doing combine from 1464 to 2196
+Node is 3... doing combine from 2196 to 2928
+Node is 0... doing combine from 1 to 732
+MD5SUM of out.jpg: 7a17b02fe7e4e676b575f6f66ba4fa01
+Load Time: 0.14664936065673828
+Convolve Time: 295.1724920272827
+Combine Time: 48.38226056098938
+Store Time: 0.1175394058227539
